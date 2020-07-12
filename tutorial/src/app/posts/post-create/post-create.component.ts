@@ -1,4 +1,4 @@
-import {Component} from '@angular/core'
+import {Component, EventEmitter, Output} from '@angular/core'
 
 @Component({
   selector : 'app-post-create',
@@ -7,11 +7,17 @@ import {Component} from '@angular/core'
 })
 export class PostCreateComponent{
 
-  newPost='NO CONTENT';
-  enteredValue
+
+  enteredContent='';
+  enteredTitle='';
+  @Output() postCreated = new EventEmitter();//@Output deklarira ta event kot event kterga lahko poslusas od zunaj (samo od direktnega starsa!!! app.component.html)
 
   onAddPost(){
-    //console.dir(postInput);
-    this.newPost = this.enteredValue;
+    const post = {
+      title: this.enteredTitle ,
+      content : this.enteredContent
+    }
+    this.postCreated.emit(post);
   }
+
 }
