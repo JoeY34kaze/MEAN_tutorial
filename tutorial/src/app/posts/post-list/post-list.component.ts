@@ -15,7 +15,7 @@ export class PostListComponent implements OnInit, OnDestroy{
   constructor(public postsService: PostsService){}
 
   ngOnInit(){
-    this.posts = this.postsService.getPosts();
+    this.postsService.getPosts();//on init sedaj nrdi https request in ob responsu ker smo subscribani se updejta.
     //setup a listener to the subject to service
     //this.postsSub je zato da se unici subscription ko ta class ni vec dela DOM-a. sicer se subscription ne zbrise in imame memory leak
     this.postsSub = this.postsService.getPostUpdateListener().subscribe(
