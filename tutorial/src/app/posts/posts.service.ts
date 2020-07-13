@@ -2,6 +2,7 @@ import {Post} from './post.model';
 import { Injectable } from '@angular/core';
 import {Subject} from 'rxjs'; //ubistvu evenr emitter
 import { HttpClient } from "@angular/common/http";
+import {map} from 'rxjs/operators'
 
 
 @Injectable({providedIn: 'root'})
@@ -15,10 +16,19 @@ export class PostsService{
 
   getPosts(){//nrdil bomo http request. lahko bo nrdil direkt u list-post ampak je bols da je centraliziran u service
 
-    this.http.get<{message :string , posts : Post[]}>('http://localhost:3000/api/post')//to en nrdi se nic ker rabmo observables zarad angularja
+    this.http.get<{message :string , posts : any}>('http://localhost:3000/api/post')//to en nrdi se nic ker rabmo observables zarad angularja
+      .pipe(map((postData)=>{
+        return postData.posts.map(post =>{//tole je samo da transformiramo field _id na id. lahko bi popravli v modelu ampak je za vajo nrjeno tkole.
+          return {
+            title : post.title,
+            content : post.content,
+            id: post._id
+          };
+        });
+      }))
       .subscribe(
-        (postData)=>{
-          this.posts = postData.posts;
+        (transformedPosts)=>{
+          this.posts = transformedPosts;
           this.postsUpdated.next([...this.posts]);
         },
         ()=>{console.log("there was an error!");}

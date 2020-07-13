@@ -38,6 +38,35 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended : false}));
 
 
+//Connect to database
+const mongoose = require('mongoose');
+mongoose.connect("mongodb+srv://admin:angal@cluster0.k3pej.mongodb.net/angular_app?retryWrites=true&w=majority").then(()=>{console.log("Successfully connected to remote MongoDB.")})
+  .catch(()=>{console.log("databsae connection failed!")});
+
+
+app.use(function handleDatabaseError(error, request, response, next) {//tole baje pohandla VSE napake ki pridejo glede podatkovne baze
+  if (error instanceof MongoError) {
+    if (error.code === 11000) {
+      return response
+        .status(HttpStatus.CONFLICT)
+        .json({
+          httpStatus: HttpStatus.CONFLICT,
+          type: 'MongoError',
+          message: error.message
+        });
+    } else {
+      return response.status(503).json({
+        httpStatus: HttpStatus.SERVICE_UNAVAILABLE,
+        type: 'MongoError',
+        message: error.message
+      });
+    }
+  }
+  next(error);
+});
+
+
+
 app.use('/api',apiRouter);
 app.use('/', indexRouter);
 
