@@ -53,4 +53,16 @@ export class PostsService{
         this.postsUpdated.next([...this.posts]);//event k spremenimo.
       });
   }
+
+  deletePost(id : string){
+    console.log("sending delete http request in service..");
+    this.http.delete<{message:String}>('http://localhost:3000/api/post/'+id).subscribe(
+      (responseData)=>{
+          console.log("received result of deleted post on server: "+responseData.message);
+          const postsUpdated = this.posts.filter(post=>post.id!==id);//returns a subset of posts based on the function that is passed as parameter that will be executed on every element. if true the element is kept, else dropped
+          this.posts = postsUpdated;
+          this.postsUpdated.next([...this.posts]);
+        }
+    )
+  }
 }

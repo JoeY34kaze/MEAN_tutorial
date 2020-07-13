@@ -16,6 +16,15 @@ module.exports.savePost = async function(req,res){
   res.status(save_post_response.status).json({message: save_post_response.message});
 }
 
+module.exports.deletePost = async function (req,res){
+  status = await delete_post(req.params._id);
+  console.log(status);
+  m="Deleted successfully!";
+   if(status !=200)
+    m="Error when deleting post."
+  res.status(status).json({message : m});
+}
+
 //---------------------------------------------------------METHODS
 
 
@@ -36,6 +45,12 @@ async function save_post(p){
 
   if(save_result==null)
   return {status:500, message : "error whens saving!"};
-
   return {status:200, message : "Sucessfully saved!"};
+}
+
+async function delete_post(_id){
+  const deleted_post = Post.deleteOne({_id : _id});
+  console.log(deleted_post);
+  if(deleted_post!=null)return 200;
+  else return 500;
 }

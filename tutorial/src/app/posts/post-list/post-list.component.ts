@@ -25,6 +25,10 @@ export class PostListComponent implements OnInit, OnDestroy{
       );//3 mozni argumenti ( function when new data emitted ,  function on error,  function when observable is completed/ when no more possible posts(to nebo nkol)  )
   }
 
+  onDelete(id : string){
+    console.log("deleting in component..");
+    this.postsService.deletePost(id);
+  }
 
   ngOnDestroy(){//za memory leak prevention
     this.postsSub.unsubscribe();
