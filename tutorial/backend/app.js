@@ -29,7 +29,7 @@ app.use((req,res,next)=>{
   res.setHeader("Access-Control-Allow-Origin","*");//vsaka domena lahko dostopa do nas
   res.setHeader("Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept");//samo pomen da ima request lahko te extra headerje. ni nujno da jih ima. ce ima kaksen header ki ni tle napisan bi biu access blokiran
-  res.setHeader("Access-Control-Allow-Methods","GET, POST, PATCH, DELETE, OPTIONS");//options mora bit ker implicitno se poslje z browserjem
+  res.setHeader("Access-Control-Allow-Methods","GET, POST, PUT, PATCH, DELETE, OPTIONS");//options mora bit ker implicitno se poslje z browserjem
     next();//posljemo naprej po sistemu
 });
 

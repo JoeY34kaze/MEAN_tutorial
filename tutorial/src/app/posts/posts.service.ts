@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import {Subject} from 'rxjs'; //ubistvu evenr emitter
 import { HttpClient } from "@angular/common/http";
 import {map} from 'rxjs/operators'
+import { title } from 'process';
 
 
 @Injectable({providedIn: 'root'})
@@ -13,6 +14,10 @@ export class PostsService{
   constructor(private http: HttpClient){}//tkole smo injectal http clienta da ga lahko uporablamo. modul za http smo prej nastimal v app.module.ts
   //private keyword v konstruktorju je zelo pomemben ker ga na ta nacin ubistvu pripnemo na class
 
+  getPost(id:string)
+  {
+    return this.http.get<{_id:string, title:string, content:string}>('http://localhost:3000/api/post/'+id);
+  }
 
   getPosts(){//nrdil bomo http request. lahko bo nrdil direkt u list-post ampak je bols da je centraliziran u service
 
@@ -69,4 +74,18 @@ export class PostsService{
         }
     )
   }
+
+  updatePost(id:string, title:string, content:string){
+    const post:Post={id:id, title:title, content:content};
+    this.http.put<{message : String , postId : String}>('http://localhost:3000/api/post/'+id,post).subscribe(
+      ()=>{
+        const updatedPosts=[...this.posts];
+        const oldPostIndex = updatedPosts.findIndex(p=>p.id===post.id);
+        updatedPosts[oldPostIndex] = post;
+        this.posts=updatedPosts;
+        this.postsUpdated.next([...this.posts]);
+      });
+  }
+
+
 }

@@ -1,5 +1,13 @@
 const Post = require('../models/post');
 
+module.exports.getPost = async function(req,res){
+  var response = await get_post(req.params._id);
+  if(response)//tko je naredu u videu lekcija /68-ish
+    res.status(200).json(response);
+  else
+    res.status(404).json({});
+}
+
 module.exports.getAll = async function(req,res){
   var all_posts = await get_all();
   status=404;
@@ -33,19 +41,36 @@ module.exports.deletePost = async function (req,res){
   res.status(status).json({message : m});
 }
 
+module.exports.updatePost = async function(req,res){
+  var update_post_result = await update_post(req.body, req.params._id);
+  if(update_post_result!=null){
+    if(update_post_result.updated_object!=null){
+
+      res.status(200).json({message : "updated", postId: req.params._id});//vrnemo ISTI id ker smo ga shranil v bazo. nismo mogli ne-shranit v bazo
+      return;
+
+    }
+  }
+  res.status(500).json();
+}
+
 //---------------------------------------------------------METHODS
 
+async function get_post(_id){
+  const post = await Post.findById(_id);
+  return post;
+}
 
 async function get_all(){
   const posts = await Post.find();
   return posts;//error se pohandla baje v app.js, ce vrnemo prazno pa tudi v zunanji metodi
 }
 
-async function save_post(p){
+async function save_post(data){
   //.... database code n stuff
   const post = new Post({
-    title : p.title,
-    content : p.content
+    title : data.title,
+    content : data.content
   });
 
   const save_result = await post.save();//ob uspesni shranitvi nam vrne objekt k smo ga shranil
@@ -61,4 +86,24 @@ async function delete_post(_id){
   //console.log(deleted_post);
   if(deleted_post!=null)return 200;
   else return 500;
+}
+
+async function update_post(data, _id){
+  const new_post=new Post({
+    _id:_id,//brez tega vrze error ker pravi da nebo brisal pa delal novga objekta.
+    title:data.title,
+    content:data.content
+  });
+  var result = await Post.updateOne({_id : _id}, new_post);
+
+  if(result!=null)
+    { if(result.nModified>0){
+        return {status:200, updated_object:result}
+      } else{
+        return {status:500,updated_object:null};
+      }
+    }
+    else{
+      return {status:500,updated_object:null};
+    }
 }
