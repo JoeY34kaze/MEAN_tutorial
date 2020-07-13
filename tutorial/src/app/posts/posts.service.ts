@@ -46,11 +46,15 @@ export class PostsService{
 
   addPost(title : string , content : string){
     const post:Post = {id:null,title : title,content : content};
-    this.http.post<{message:String}>('http://localhost:3000/api/post',post).subscribe(
+    this.http.post<{message : String , postId : String}>('http://localhost:3000/api/post',post).subscribe(
       (responseData)=>{
-        console.log(responseData.message);//updejtamo sele ko dobimo konfirmacijo z serverja.
-        this.posts.push(post);
-        this.postsUpdated.next([...this.posts]);//event k spremenimo.
+        console.log(responseData.message+" "+responseData.postId);//updejtamo sele ko dobimo konfirmacijo z serverja.
+        const id=responseData.postId;
+        if(id!=null){
+          post.id=id;
+          this.posts.push(post);
+          this.postsUpdated.next([...this.posts]);//event k spremenimo.
+        }
       });
   }
 

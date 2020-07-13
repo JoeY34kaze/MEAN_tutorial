@@ -10,10 +10,18 @@ module.exports.getAll = async function(req,res){
 }
 
 module.exports.savePost = async function(req,res){
-  console.log("saving post -> "+req.body.title);
+  console.log("saving post ");
   //201 ok, new resource was created
   var save_post_response = await save_post(req.body);
-  res.status(save_post_response.status).json({message: save_post_response.message});
+  if(save_post!=null){
+    if(save_post_response.saved_object!=null){
+      if (save_post_response.saved_object._id!=null){
+        res.status(200).json({message : "saved", postId: save_post_response.saved_object._id});
+        return;
+      }
+    }
+  }
+  res.status(500).json();
 }
 
 module.exports.deletePost = async function (req,res){
@@ -41,16 +49,16 @@ async function save_post(p){
   });
 
   const save_result = await post.save();//ob uspesni shranitvi nam vrne objekt k smo ga shranil
-  console.log(save_result);
+  //console.log(save_result);
 
   if(save_result==null)
-  return {status:500, message : "error whens saving!"};
-  return {status:200, message : "Sucessfully saved!"};
+  return {status:500, saved_object : null};
+  return {status:200, saved_object : save_result};
 }
 
 async function delete_post(_id){
-  const deleted_post = Post.deleteOne({_id : _id});
-  console.log(deleted_post);
+  const deleted_post = await Post.deleteOne({_id : _id});
+  //console.log(deleted_post);
   if(deleted_post!=null)return 200;
   else return 500;
 }
