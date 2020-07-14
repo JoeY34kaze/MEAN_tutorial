@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import {Subject} from 'rxjs'; //ubistvu evenr emitter
 import { HttpClient } from "@angular/common/http";
 import {map} from 'rxjs/operators'
-import { title } from 'process';
+import { Router } from '@angular/router';
 
 
 @Injectable({providedIn: 'root'})
@@ -11,7 +11,7 @@ export class PostsService{
   private posts : Post[] = [];
   private postsUpdated = new Subject<Post[]>();
 
-  constructor(private http: HttpClient){}//tkole smo injectal http clienta da ga lahko uporablamo. modul za http smo prej nastimal v app.module.ts
+  constructor(private http: HttpClient, private router:Router){}//tkole smo injectal http clienta da ga lahko uporablamo. modul za http smo prej nastimal v app.module.ts
   //private keyword v konstruktorju je zelo pomemben ker ga na ta nacin ubistvu pripnemo na class
 
   getPost(id:string)
@@ -59,6 +59,7 @@ export class PostsService{
           post.id=id;
           this.posts.push(post);
           this.postsUpdated.next([...this.posts]);//event k spremenimo.
+          this.router.navigate(["/"]);//po dodajanju ga redirectej na /
         }
       });
   }
@@ -84,6 +85,7 @@ export class PostsService{
         updatedPosts[oldPostIndex] = post;
         this.posts=updatedPosts;
         this.postsUpdated.next([...this.posts]);
+        this.router.navigate(["/"]);//po dodajanju ga redirectej na /
       });
   }
 
