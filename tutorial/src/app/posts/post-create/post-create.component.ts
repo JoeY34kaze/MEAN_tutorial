@@ -21,8 +21,9 @@ export class PostCreateComponent implements OnInit{
 
   ngOnInit(): void {
     this.form = new FormGroup({
-      'title': new FormControl(null, {validators: [Validators.required, Validators.minLength(3)]}),//single control in a  form
-      'content': new FormControl(null, {validators: [Validators.required, Validators.minLength(1)]})
+      title: new FormControl(null, {validators: [Validators.required, Validators.minLength(3)]}),//single control in a  form
+      content: new FormControl(null, {validators: [Validators.required, Validators.minLength(1)]}),
+      image : new FormControl(null, {validators:[Validators.required]})
     });
     //ker pri kreaciji in pri editanju posta uporabljamo isto angular componento moramo nekak ugotovit kje se nahajamo po url. here is where we do this.
     this.route.paramMap.subscribe((paramMap : ParamMap)=>{
@@ -63,6 +64,12 @@ export class PostCreateComponent implements OnInit{
       this.postsService.updatePost(this.postId, this.form.value.title, this.form.value.content);
     }
     this.form.reset();
+  }
+
+  onImagePicked(event : Event){
+    const file = (event.target as HTMLInputElement).files[0];
+    this.form.patchValue({image : file});//targets single control
+    this.form.get('image').updateValueAndValidity();//updejtej kar smo zamenjal in poglej če je vse valid zdej
   }
 
 }
