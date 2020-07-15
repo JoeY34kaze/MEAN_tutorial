@@ -11,11 +11,15 @@ module.exports.getPost = async function(req,res){
 }
 
 module.exports.getAll = async function(req,res){
-  var all_posts = await get_all();
+  const pageSize = req.query.pageSize;
+  const currentPage = req.query.currentPage;
+
+
+  var search_query_response = await get_all(pageSize,currentPage);
   status=404;
-  if(all_posts)
+  if(search_query_response)
     status=200;
-  res.status(status).json( {message: 'Posts fetched successfully!', posts : all_posts} );//tkole nastimamo status!!! omg so easy
+  res.status(status).json( {message: 'Posts fetched successfully!', posts : search_query_response.posts, maxPosts:search_query_response.maxPosts} );//tkole nastimamo status!!! omg so easy
 }
 
 module.exports.savePost = async function(req,res){
@@ -79,9 +83,22 @@ async function get_post(_id){
   return post;
 }
 
-async function get_all(){
-  const posts = await Post.find();
-  return posts;//error se pohandla baje v app.js, ce vrnemo prazno pa tudi v zunanji metodi
+async function get_all(pageSize, currentPage){
+
+  const postQuery = Post.find();
+
+  if(pageSize && currentPage){
+    console.log("page size; "+pageSize+"  currentPage: "+currentPage);
+    if(currentPage<1)currentPage=1;
+
+    postQuery
+      .skip(pageSize * (currentPage-1))//we skip the first n posts.(previous pages)
+      .limit(parseInt(pageSize));
+  }
+
+  const numberOfPosts = await Post.count();
+  const posts = await postQuery;
+  return {posts :posts, maxPosts : numberOfPosts};//error se pohandla baje v app.js, ce vrnemo prazno pa tudi v zunanji metodi
 }
 
 async function save_post(req){

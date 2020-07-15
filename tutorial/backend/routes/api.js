@@ -38,3 +38,5 @@ router.get('/post',postController.getAll);
 router.delete('/post/:_id',postController.deletePost);
 router.get("/post/:_id", postController.getPost);
 module.exports = router;
+
+//paginacija je z query parameters. '?'

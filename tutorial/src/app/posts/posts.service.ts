@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 @Injectable({providedIn: 'root'})
 export class PostsService{
   private posts : Post[] = [];
-  private postsUpdated = new Subject<Post[]>();
+  private postsUpdated = new Subject<{posts:Post[], postCount:number}>();
 
   constructor(private http: HttpClient, private router:Router){}//tkole smo injectal http clienta da ga lahko uporablamo. modul za http smo prej nastimal v app.module.ts
   //private keyword v konstruktorju je zelo pomemben ker ga na ta nacin ubistvu pripnemo na class
@@ -19,23 +19,23 @@ export class PostsService{
     return this.http.get<{_id:string, title:string, content:string, imagePath:string}>('http://localhost:3000/api/post/'+id);
   }
 
-  getPosts(){//nrdil bomo http request. lahko bo nrdil direkt u list-post ampak je bols da je centraliziran u service
-
-    this.http.get<{message :string , posts : any}>('http://localhost:3000/api/post')//to en nrdi se nic ker rabmo observables zarad angularja
+  getPosts(pageSize:number, currentPage:number){//nrdil bomo http request. lahko bo nrdil direkt u list-post ampak je bols da je centraliziran u service
+    const queryParams = `?pageSize=${pageSize}&currentPage=${currentPage}`; //BACKTICKS special js feature to add values to strings
+    this.http.get<{message :string , posts : any, maxPosts: number}>('http://localhost:3000/api/post'+queryParams)//to en nrdi se nic ker rabmo observables zarad angularja
       .pipe(map((postData)=>{
-        return postData.posts.map(post =>{//tole je samo da transformiramo field _id na id. lahko bi popravli v modelu ampak je za vajo nrjeno tkole.
+        return { posts : postData.posts.map(post =>{//tole je samo da transformiramo field _id na id. lahko bi popravli v modelu ampak je za vajo nrjeno tkole.
           return {
             title : post.title,
             content : post.content,
             id: post._id,
             imagePath : post.imagePath//z serverja bi mogl bit tkole.
           };
-        });
+        }), maxPosts : postData.maxPosts};
       }))
       .subscribe(
-        (transformedPosts)=>{
-          this.posts = transformedPosts;
-          this.postsUpdated.next([...this.posts]);
+        (transformedPostData)=>{
+          this.posts = transformedPostData.posts;
+          this.postsUpdated.next({posts: [...this.posts],postCount:transformedPostData.maxPosts});
         },
         ()=>{console.log("there was an error!");}
       );//sedaj bo kul. also nerabmo skrbet za unicenje ker za http in druge module ki so direktno u angularju se to pohandla avtomatsko
@@ -57,16 +57,7 @@ export class PostsService{
     postData.append("image",image, title);//mora bit image zarad backenda kjer smo nastavli. title -> name of image
     this.http.post<{message : String , post : Post}>('http://localhost:3000/api/post',postData).subscribe(
       (responseData)=>{
-        const post :Post={
-          id : responseData.post.id,
-          title : responseData.post.title,
-          content : responseData.post.content,
-          imagePath : responseData.post.imagePath
-        };
-        this.posts.push(post);
-        this.postsUpdated.next([...this.posts]);//event k spremenimo.
         this.router.navigate(["/"]);//po dodajanju ga redirectej na /
-
       });
   }
 
@@ -85,27 +76,13 @@ export class PostsService{
 
     this.http.put<{message : String , postId : String, imagePath:string}>('http://localhost:3000/api/post/'+id,postData).subscribe(
       (responseData)=>{
-
-        const updatedPosts=[...this.posts];
-        const oldPostIndex = updatedPosts.findIndex(p=>p.id===id);
-        const post :Post = {id:id, title:title, content:content, imagePath: responseData.imagePath};
-        updatedPosts[oldPostIndex] = post;
-        this.posts=updatedPosts;
-        this.postsUpdated.next([...this.posts]);
         this.router.navigate(["/"]);//po dodajanju ga redirectej na /
       });
   }
 
   deletePost(id : string){
     console.log("sending delete http request in service..");
-    this.http.delete<{message:String}>('http://localhost:3000/api/post/'+id).subscribe(
-      (responseData)=>{
-          console.log("received result of deleted post on server: "+responseData.message);
-          const postsUpdated = this.posts.filter(post=>post.id!==id);//returns a subset of posts based on the function that is passed as parameter that will be executed on every element. if true the element is kept, else dropped
-          this.posts = postsUpdated;
-          this.postsUpdated.next([...this.posts]);
-        }
-    )
+    return this.http.delete<{message:String}>('http://localhost:3000/api/post/'+id);
   }
 
 
