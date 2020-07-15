@@ -13,9 +13,8 @@ module.exports.getPost = async function(req,res){
 module.exports.getAll = async function(req,res){
   var all_posts = await get_all();
   status=404;
-  if(all_posts!=null)
-
-      status=200;
+  if(all_posts)
+    status=200;
   res.status(status).json( {message: 'Posts fetched successfully!', posts : all_posts} );//tkole nastimamo status!!! omg so easy
 }
 

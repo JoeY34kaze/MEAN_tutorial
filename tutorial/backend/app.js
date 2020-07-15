@@ -22,6 +22,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+//nrdimo da je images available do public.
+app.use('/images',express.static(path.join(__dirname, 'images')));
+
 
 //-----CORS
 //nastavit mormo headerje. torej mormo mal manipulirat response
