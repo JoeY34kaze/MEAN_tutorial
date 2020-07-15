@@ -1,3 +1,9 @@
+
+./tutorial/backend/images
+/tutorial/backend/images
+backend/images
+.backend/images
+
 # Logs
 logs
 *.log
