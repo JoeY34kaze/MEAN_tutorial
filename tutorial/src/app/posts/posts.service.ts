@@ -27,7 +27,8 @@ export class PostsService{
           return {
             title : post.title,
             content : post.content,
-            id: post._id
+            id: post._id,
+            imagePath : post.imagePath//z serverja bi mogl bit tkole.
           };
         });
       }))
@@ -49,18 +50,37 @@ export class PostsService{
     return this.postsUpdated.asObservable();//mislm da loh tega sedaj samo poslusamo
   }
 
-  addPost(title : string , content : string){
-    const post:Post = {id:null,title : title,content : content};
-    this.http.post<{message : String , postId : String}>('http://localhost:3000/api/post',post).subscribe(
+  addPost(title : string , content : string, image : File){
+    const postData = new FormData();//allows us to combine text data and blob. blob = file
+    postData.append("title",title);
+    postData.append("content",content);
+    postData.append("image",image, title);//mora bit image zarad backenda kjer smo nastavli. title -> name of image
+    this.http.post<{message : String , post : Post}>('http://localhost:3000/api/post',postData).subscribe(
       (responseData)=>{
-        console.log(responseData.message+" "+responseData.postId);//updejtamo sele ko dobimo konfirmacijo z serverja.
-        const id=responseData.postId;
-        if(id!=null){
-          post.id=id;
-          this.posts.push(post);
-          this.postsUpdated.next([...this.posts]);//event k spremenimo.
-          this.router.navigate(["/"]);//po dodajanju ga redirectej na /
-        }
+        const post :Post={
+          id : responseData.post.id,
+          title : responseData.post.title,
+          content : responseData.post.content,
+          imagePath : responseData.post.imagePath
+        };
+        this.posts.push(post);
+        this.postsUpdated.next([...this.posts]);//event k spremenimo.
+        this.router.navigate(["/"]);//po dodajanju ga redirectej na /
+
+      });
+  }
+
+  updatePost(id:string, title:string, content:string, file:File){
+    const post : Post = {id:id, title:title, content:content, imagePath:null}
+    this.http.put<{message : String , postId : String}>('http://localhost:3000/api/post/'+id,post).subscribe(
+      ()=>{
+        var post:Post;
+        const updatedPosts=[...this.posts];
+        const oldPostIndex = updatedPosts.findIndex(p=>p.id===id);
+        updatedPosts[oldPostIndex] = post;
+        this.posts=updatedPosts;
+        this.postsUpdated.next([...this.posts]);
+        this.router.navigate(["/"]);//po dodajanju ga redirectej na /
       });
   }
 
@@ -76,18 +96,6 @@ export class PostsService{
     )
   }
 
-  updatePost(id:string, title:string, content:string){
-    const post:Post={id:id, title:title, content:content};
-    this.http.put<{message : String , postId : String}>('http://localhost:3000/api/post/'+id,post).subscribe(
-      ()=>{
-        const updatedPosts=[...this.posts];
-        const oldPostIndex = updatedPosts.findIndex(p=>p.id===post.id);
-        updatedPosts[oldPostIndex] = post;
-        this.posts=updatedPosts;
-        this.postsUpdated.next([...this.posts]);
-        this.router.navigate(["/"]);//po dodajanju ga redirectej na /
-      });
-  }
 
 
 }

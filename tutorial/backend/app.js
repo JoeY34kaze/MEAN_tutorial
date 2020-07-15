@@ -4,7 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const bodyParser = require('body-parser');
-
+const multer = require('multer');
 
 var indexRouter = require('./routes/index');
 var apiRouter = require('./routes/api');
@@ -36,6 +36,10 @@ app.use((req,res,next)=>{
 //-----------BODY PARSER
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended : false}));
+
+
+//multer potrebujemo za extractanje fajlov iz requesta
+
 
 
 //Connect to database

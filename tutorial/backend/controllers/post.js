@@ -1,5 +1,7 @@
 const Post = require('../models/post');
 
+//--------------------- NEccessary Logic above
+
 module.exports.getPost = async function(req,res){
   var response = await get_post(req.params._id);
   if(response)//tko je naredu u videu lekcija /68-ish
@@ -12,19 +14,36 @@ module.exports.getAll = async function(req,res){
   var all_posts = await get_all();
   status=404;
   if(all_posts!=null)
-    if(all_posts.length>0)
+
       status=200;
   res.status(status).json( {message: 'Posts fetched successfully!', posts : all_posts} );//tkole nastimamo status!!! omg so easy
 }
 
 module.exports.savePost = async function(req,res){
-  console.log("saving post ");
+  console.log("saving post.. ");
   //201 ok, new resource was created
-  var save_post_response = await save_post(req.body);
+
+  var save_post_response = await save_post(req);
+  console.dir(save_post_response.saved_object);
   if(save_post!=null){
     if(save_post_response.saved_object!=null){
       if (save_post_response.saved_object._id!=null){
-        res.status(200).json({message : "saved", postId: save_post_response.saved_object._id});
+        res.status(200).json({message : "saved", post:{
+
+            //OLD STYLE :  rabmo ubistvu povozt _id z id
+
+          id: save_post_response.saved_object._id,
+          title : save_post_response.saved_object.title,
+          content : save_post_response.saved_object.content,
+          imagePath : save_post_response.saved_object.imagePath
+
+
+          // NEW STYLE
+          /*
+          ...save_post_response.saved_object,
+          id: save_post_response.saved_object._id
+          */
+        }});
         return;
       }
     }
@@ -66,15 +85,18 @@ async function get_all(){
   return posts;//error se pohandla baje v app.js, ce vrnemo prazno pa tudi v zunanji metodi
 }
 
-async function save_post(data){
+async function save_post(req){
   //.... database code n stuff
+  const url = req.protocol + "://" + req.get("host");
   const post = new Post({
-    title : data.title,
-    content : data.content
+    title: req.body.title,
+    content: req.body.content,
+    imagePath: url + "/images/" + req.file.filename
   });
 
+  console.log("  2saving... : "+post);
   const save_result = await post.save();//ob uspesni shranitvi nam vrne objekt k smo ga shranil
-  //console.log(save_result);
+  console.log(save_result);
 
   if(save_result==null)
   return {status:500, saved_object : null};
