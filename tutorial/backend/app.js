@@ -7,7 +7,8 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 
 var indexRouter = require('./routes/index');
-var apiRouter = require('./routes/api');
+var postRouter = require('./routes/post');
+var userRouter = require('./routes/user');
 
 
 var app = express();
@@ -74,7 +75,8 @@ app.use(function handleDatabaseError(error, request, response, next) {//tole baj
 
 
 
-app.use('/api',apiRouter);
+app.use('/api/post',postRouter);
+app.use('/api/user',userRouter);
 app.use('/', indexRouter);
 
 
