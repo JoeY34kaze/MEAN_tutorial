@@ -60,11 +60,11 @@ module.exports.deletePost = async function (req,res){
 }
 
 module.exports.updatePost = async function(req,res){
-  var update_post_result = await update_post(req.body, req.params._id);
+  var update_post_result = await update_post(req);
   if(update_post_result!=null){
     if(update_post_result.updated_object!=null){
 
-      res.status(200).json({message : "updated", postId: req.params._id});//vrnemo ISTI id ker smo ga shranil v bazo. nismo mogli ne-shranit v bazo
+      res.status(200).json({message : "updated", postId: req.params._id, imagePath:update_post_result.updated_object.imagePath});//vrnemo ISTI id ker smo ga shranil v bazo. nismo mogli ne-shranit v bazo
       return;
 
     }
@@ -109,14 +109,22 @@ async function delete_post(_id){
   else return 500;
 }
 
-async function update_post(data, _id){
-  const new_post=new Post({
-    _id:_id,//brez tega vrze error ker pravi da nebo brisal pa delal novga objekta.
-    title:data.title,
-    content:data.content
-  });
-  var result = await Post.updateOne({_id : _id}, new_post);
+async function update_post(req){
+  let imagePath=req.body.imagePath;//image path we already have
+  if(req.file){
+    const url = req.protocol + "://" + req.get("host");//image path that was newly uploaded
+    imagePath=url + "/images/" + req.file.filename;
+  }
 
+  const new_post = new Post({
+    _id:req.body.id,//brez tega vrze error ker pravi da nebo brisal pa delal novga objekta.
+    title: req.body.title,
+    content: req.body.content,
+    imagePath: imagePath
+  });
+  var result = await Post.updateOne({_id : req.body.id}, new_post);
+
+  console.log(result);
   if(result!=null)
     { if(result.nModified>0){
         return {status:200, updated_object:result}
