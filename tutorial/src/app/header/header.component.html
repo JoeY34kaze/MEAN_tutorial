@@ -1,5 +1,5 @@
 <mat-toolbar color="primary">
-  <span>
+  <span *ngIf="userIsAuthenticated">
     <a routerLink='/' mat-button >My Messages</a>
   </span>
   <span class="spacer"></span>

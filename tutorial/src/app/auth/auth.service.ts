@@ -3,6 +3,7 @@ import { HttpClient } from "@angular/common/http";
 
 import { AuthData } from "./auth-data.model";
 import { Subject } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: "root" })//to pomeni da providamo na root nivoju in lahko povsod injectamo
 export class AuthService {
@@ -10,7 +11,7 @@ export class AuthService {
   private userIsAuthenticated=false;
 private authStatusListener = new Subject<boolean>();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router : Router) {}
 
   getAuthStatusListener(){
     return this.authStatusListener.asObservable();//z drugje lahko poslusamo nemormo pa posiljat, samo s tukaj lahko posiljamo
@@ -37,6 +38,7 @@ private authStatusListener = new Subject<boolean>();
     this.userIsAuthenticated=false;
     this.authStatusListener.next(false);
     console.log("logged out")
+    this.router.navigate(['/']);
   }
 
   login(email: string, password: string) {
@@ -49,6 +51,7 @@ private authStatusListener = new Subject<boolean>();
         if(token){
           this.userIsAuthenticated=true;
           this.authStatusListener.next(true);
+          this.router.navigate(['/']);
         }
       })
   }
