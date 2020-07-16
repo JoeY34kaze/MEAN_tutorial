@@ -4,14 +4,13 @@ import { HttpClient } from "@angular/common/http";
 import { AuthData } from "./auth-data.model";
 import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
-import { time } from 'console';
 
 @Injectable({ providedIn: "root" })//to pomeni da providamo na root nivoju in lahko povsod injectamo
 export class AuthService {
   private token: string;
   private userIsAuthenticated=false;
   private authStatusListener = new Subject<boolean>();
-  private tokenTimer : NodeJS.Timer;
+  private tokenTimer : any;
 
   constructor(private http: HttpClient, private router : Router) {}
 
@@ -65,6 +64,7 @@ export class AuthService {
   }
 
   private saveAuthData(token : string, expirationDate: Date){
+    console.log("saving to local storage");
     localStorage.setItem('token',token);
     localStorage.setItem('expiration',expirationDate.toISOString());
   }
