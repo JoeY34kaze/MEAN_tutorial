@@ -9,7 +9,8 @@ import { Router } from '@angular/router';
 export class AuthService {
   private token: string;
   private userIsAuthenticated=false;
-private authStatusListener = new Subject<boolean>();
+  private authStatusListener = new Subject<boolean>();
+  private tokenTimer : NodeJS.Timer;
 
   constructor(private http: HttpClient, private router : Router) {}
 
@@ -38,17 +39,19 @@ private authStatusListener = new Subject<boolean>();
     this.userIsAuthenticated=false;
     this.authStatusListener.next(false);
     console.log("logged out")
+    clearTimeout(this.tokenTimer);
     this.router.navigate(['/']);
   }
 
   login(email: string, password: string) {
     const authData: AuthData = {email: email, password: password};
-    this.http.post<{token: string}>("http://localhost:3000/api/user/login", authData)
+    this.http.post<{token: string, time:number}>("http://localhost:3000/api/user/login", authData)
       .subscribe(response => {
         const token = response.token;
         console.log("received token : "+token);
         this.token = token;
         if(token){
+          this.tokenTimer=setTimeout(()=>{this.logout()},response.time*1000);
           this.userIsAuthenticated=true;
           this.authStatusListener.next(true);
           this.router.navigate(['/']);

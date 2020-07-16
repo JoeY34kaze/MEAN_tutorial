@@ -30,7 +30,7 @@ module.exports.login = async function(req,res){
   else{
     res.status(404);
   }
-  res.json({token:token});
+  res.json({token:token, time: 3600});
 }
 
 
