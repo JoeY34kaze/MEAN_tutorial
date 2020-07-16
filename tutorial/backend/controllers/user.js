@@ -24,13 +24,14 @@ module.exports.createNewUser = async function(req,res){
 
 module.exports.login = async function(req,res){
   const QueryData = await find_user_with_login(req.body.email,req.body.password);
-  if(QueryData){
-    res.status(200);
+  console.log(QueryData);
+  if(QueryData && QueryData.token && QueryData.userId){
+    res.status(200).json({token:QueryData.token, time: 3600, userId:QueryData.userId });
   }
   else{
-    res.status(404);
+    res.status(401).json({});
   }
-  res.json({token:QueryData.token, time: 3600, userId:QueryData.userId });
+
 }
 
 
