@@ -20,6 +20,7 @@ export class HeaderComponent implements OnInit, OnDestroy {//subscribal bomo na 
   }
 
   ngOnInit(){
+    this.userIsAuthenticated = this.authService.getIsAuth();//ker pri automatski avtorizaciji ki jo sprozimo iz appcpmponent se izvede preden se sploh nrdi header. rabmo iz headerja poklicat pa pogledat kaksno je dejansko stanje avtorizacije na zacetku
     this.authListenerSubs = this.authService.getAuthStatusListener().subscribe((isAuthenticated)=>{
       this.userIsAuthenticated=isAuthenticated;
     });
