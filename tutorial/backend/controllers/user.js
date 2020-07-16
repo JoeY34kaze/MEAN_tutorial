@@ -23,14 +23,14 @@ module.exports.createNewUser = async function(req,res){
 }
 
 module.exports.login = async function(req,res){
-  const token = await find_user_with_login(req.body.email,req.body.password);
-  if(token){
+  const QueryData = await find_user_with_login(req.body.email,req.body.password);
+  if(QueryData){
     res.status(200);
   }
   else{
     res.status(404);
   }
-  res.json({token:token, time: 3600});
+  res.json({token:QueryData.token, time: 3600, userId:QueryData.userId });
 }
 
 
@@ -76,6 +76,6 @@ async function find_user_with_login(email,password){
 
   const token = jwt.sign({email:user.email, userId:user._id}, JWTSECRET, {expiresIn: "1h"});
 
-  return token;
+  return {token: token, userId: user._id};
 
 }

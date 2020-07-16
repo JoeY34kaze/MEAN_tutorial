@@ -20,11 +20,13 @@ export class PostListComponent implements OnInit, OnDestroy{
   pageSizeOptions = [1,2,5,10]
   currentPage=1;
   userIsAuthenticated=false;
+  userId:string;
   constructor(public postsService: PostsService, private authService : AuthService){}
 
   ngOnInit(){
     this.isLoading=true;
     this.postsService.getPosts(this.postsPerPage,1);//on init sedaj nrdi https request in ob responsu ker smo subscribani se updejta.
+    this.userId=this.authService.getUserID();
     //setup a listener to the subject to service
     //this.postsSub je zato da se unici subscription ko ta class ni vec dela DOM-a. sicer se subscription ne zbrise in imame memory leak
     this.postsSub = this.postsService.getPostUpdateListener().subscribe(
@@ -36,7 +38,10 @@ export class PostListComponent implements OnInit, OnDestroy{
       );//3 mozni argumenti ( function when new data emitted ,  function on error,  function when observable is completed/ when no more possible posts(to nebo nkol)  )
 
       this.userIsAuthenticated = this.authService.getIsAuth();//tole zato da se pohandla takoj na zacetku ker dokler se user ne logina se autentikacija ne pohandla
-    this.authStatusSubs = this.authService.getAuthStatusListener().subscribe((status)=>{this.userIsAuthenticated = status;});
+    this.authStatusSubs = this.authService.getAuthStatusListener().subscribe((status)=>{
+      this.userIsAuthenticated = status;
+      this.userId = this.authService.getUserID();
+    });
   }
 
   onChangedPage(event:PageEvent){

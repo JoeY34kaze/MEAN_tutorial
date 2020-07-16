@@ -16,7 +16,7 @@ export class PostsService{
 
   getPost(id:string)
   {
-    return this.http.get<{_id:string, title:string, content:string, imagePath:string}>('http://localhost:3000/api/post/'+id);
+    return this.http.get<{_id:string, title:string, content:string, imagePath:string, creator:string}>('http://localhost:3000/api/post/'+id);
   }
 
   getPosts(pageSize:number, currentPage:number){//nrdil bomo http request. lahko bo nrdil direkt u list-post ampak je bols da je centraliziran u service
@@ -28,7 +28,8 @@ export class PostsService{
             title : post.title,
             content : post.content,
             id: post._id,
-            imagePath : post.imagePath//z serverja bi mogl bit tkole.
+            imagePath : post.imagePath,//z serverja bi mogl bit tkole.
+            creator : post.creator
           };
         }), maxPosts : postData.maxPosts};
       }))
@@ -50,7 +51,7 @@ export class PostsService{
     return this.postsUpdated.asObservable();//mislm da loh tega sedaj samo poslusamo
   }
 
-  addPost(title : string , content : string, image : File){
+  addPost(title : string , content : string, image : File, creator : string){
     const postData = new FormData();//allows us to combine text data and blob. blob = file
     postData.append("title",title);
     postData.append("content",content);
@@ -61,7 +62,7 @@ export class PostsService{
       });
   }
 
-  updatePost(id:string, title:string, content:string, image:File | string){
+  updatePost(id:string, title:string, content:string, image:File | string, creator : string){
     let postData: Post | FormData;
     if(typeof(image)==='object')
     {//ce je image potem hocmo nrdit FormData ker je user uploadal novo sliko
@@ -71,7 +72,7 @@ export class PostsService{
       postData.append("content",content);
       postData.append("image",image, title);
     }else{//ni spremenil slike. je string
-      postData = {id:id, title:title, content:content, imagePath:image}
+      postData = {id:id, title:title, content:content, imagePath:image,creator : null}
     }
 
     this.http.put<{message : String , postId : String, imagePath:string}>('http://localhost:3000/api/post/'+id,postData).subscribe(

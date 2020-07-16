@@ -38,7 +38,8 @@ module.exports.savePost = async function(req,res){
           id: save_post_response.saved_object._id,
           title : save_post_response.saved_object.title,
           content : save_post_response.saved_object.content,
-          imagePath : save_post_response.saved_object.imagePath
+          imagePath : save_post_response.saved_object.imagePath,
+          creator : save_post_response.saved_object.creator
 
 
           // NEW STYLE
@@ -55,7 +56,7 @@ module.exports.savePost = async function(req,res){
 }
 
 module.exports.deletePost = async function (req,res){
-  status = await delete_post(req.params._id);
+  status = await delete_post(req);
   console.log(status);
   m="Deleted successfully!";
    if(status !=200)
@@ -107,7 +108,8 @@ async function save_post(req){
   const post = new Post({
     title: req.body.title,
     content: req.body.content,
-    imagePath: url + "/images/" + req.file.filename
+    imagePath: url + "/images/" + req.file.filename,
+    creator: req.tokenData.userId
   });
 
   console.log("  2saving... : "+post);
@@ -119,10 +121,10 @@ async function save_post(req){
   return {status:200, saved_object : save_result};
 }
 
-async function delete_post(_id){
-  const deleted_post = await Post.deleteOne({_id : _id});
+async function delete_post(req){
+  const deleted_post = await Post.deleteOne({_id : req.params._id, creator : req.tokenData.userId});
   //console.log(deleted_post);
-  if(deleted_post!=null)return 200;
+  if(deleted_post.n>0)return 200;
   else return 500;
 }
 
@@ -137,9 +139,10 @@ async function update_post(req){
     _id:req.body.id,//brez tega vrze error ker pravi da nebo brisal pa delal novga objekta.
     title: req.body.title,
     content: req.body.content,
-    imagePath: imagePath
+    imagePath: imagePath,
+    creator : req.tokenData.userId
   });
-  var result = await Post.updateOne({_id : req.body.id}, new_post);
+  var result = await Post.updateOne({_id : req.body.id, creator : req.tokenData.userId}, new_post);
 
   console.log(result);
   if(result!=null)

@@ -10,6 +10,7 @@ module.exports = (req,res,next)=>{
 
     const tokenData = jwt.verify(token, JWTSECRET);
     console.log("token verified successfuly. : "+tokenData);
+    req.tokenData = tokenData;
     next();
   }catch(error){
     console.log("Token authentication failed.");
