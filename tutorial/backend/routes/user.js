@@ -7,7 +7,7 @@ const userController = require('../controllers/user');
 
 ///api/user/signup
 router.post("/signup", userController.createNewUser)
-
+router.post("/login", userController.login)
 
 
 
