@@ -146,7 +146,7 @@ async function update_post(req){
 
   console.log(result);
   if(result!=null)
-    { if(result.nModified>0){
+    { if(result.n>0 ){
         return {status:200, updated_object:result}
       } else{
         return {status:500,updated_object:null};
